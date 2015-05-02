@@ -105,6 +105,11 @@ void            terminal_window_notebook_show_tabs   (TerminalWindow     *window
 
 GSList         *terminal_window_get_restart_command  (TerminalWindow     *window);
 
+void            terminal_window_action_prev_tab      (GtkAction          *action,
+                                                      TerminalWindow     *window);
+void            terminal_window_action_next_tab      (GtkAction          *action,
+                                                      TerminalWindow     *window);
+
 G_END_DECLS
 
 #endif /* !__TERMINAL_WINDOW_H__ */

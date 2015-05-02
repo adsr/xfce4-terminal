@@ -653,6 +653,18 @@ terminal_widget_key_press_event (GtkWidget    *widget,
           return TRUE;
         }
     }
+  else if (event->keyval == GDK_Tab) // && (event->state & GDK_CONTROL_MASK) != 0)
+    {
+      if ((event->state & GDK_SHIFT_MASK) != 0)
+        {
+          terminal_window_action_prev_tab(NULL, GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (widget))));
+        }
+      else
+        {
+          terminal_window_action_next_tab(NULL, GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (widget))));
+        }
+      return TRUE;
+    }
 
   return (*GTK_WIDGET_CLASS (terminal_widget_parent_class)->key_press_event) (widget, event);
 }

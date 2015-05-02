@@ -156,9 +156,9 @@ static void            terminal_window_action_show_borders           (GtkToggleA
                                                                       TerminalWindow         *window);
 static void            terminal_window_action_fullscreen             (GtkToggleAction        *action,
                                                                       TerminalWindow         *window);
-static void            terminal_window_action_prev_tab               (GtkAction              *action,
+void                   terminal_window_action_prev_tab               (GtkAction              *action,
                                                                       TerminalWindow         *window);
-static void            terminal_window_action_next_tab               (GtkAction              *action,
+void                   terminal_window_action_next_tab               (GtkAction              *action,
                                                                       TerminalWindow         *window);
 static void            terminal_window_action_move_tab_left          (GtkAction              *action,
                                                                       TerminalWindow         *window);
@@ -283,6 +283,26 @@ terminal_window_class_init (TerminalWindowClass *klass)
 
 
 
+static gboolean
+on_key_press (GtkWidget *widget, GdkEventKey *event, TerminalWindow *window)
+{
+  if ((event->keyval == GDK_Tab || event->keyval == GDK_ISO_Left_Tab) && (event->state & GDK_CONTROL_MASK) != 0)
+    {
+      if (event->keyval == GDK_ISO_Left_Tab || (event->state & GDK_SHIFT_MASK) != 0)
+        {
+          terminal_window_action_prev_tab(NULL, window);
+        }
+      else
+        {
+          terminal_window_action_next_tab(NULL, window);
+        }
+      return TRUE;
+    }
+  return FALSE;
+}
+
+
+
 static void
 terminal_window_init (TerminalWindow *window)
 {
@@ -318,6 +338,9 @@ terminal_window_init (TerminalWindow *window)
 
   accel_group = gtk_ui_manager_get_accel_group (window->ui_manager);
   gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+
+  g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (on_key_press), window);
+
   g_signal_connect_after (G_OBJECT (accel_group), "accel-activate",
       G_CALLBACK (terminal_window_accel_activate), window);
 
@@ -1456,7 +1479,7 @@ terminal_window_action_fullscreen (GtkToggleAction *action,
 
 
 
-static void
+void
 terminal_window_action_prev_tab (GtkAction       *action,
                                  TerminalWindow  *window)
 {
@@ -1471,7 +1494,7 @@ terminal_window_action_prev_tab (GtkAction       *action,
 
 
 
-static void
+void
 terminal_window_action_next_tab (GtkAction       *action,
                                  TerminalWindow  *window)
 {
