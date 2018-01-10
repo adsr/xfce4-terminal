@@ -136,6 +136,8 @@ static void       terminal_screen_vte_resize_window             (VteTerminal    
                                                                  guint                  width,
                                                                  guint                  height,
                                                                  TerminalScreen        *screen);
+static void       terminal_screen_vte_beep                      (VteTerminal           *terminal,
+                                                                 TerminalScreen        *screen);
 static void       terminal_screen_vte_window_contents_changed   (TerminalScreen        *screen);
 static void       terminal_screen_vte_window_contents_resized   (TerminalScreen        *screen);
 static void       terminal_screen_update_label_orientation      (TerminalScreen        *screen);
@@ -275,6 +277,8 @@ terminal_screen_init (TerminalScreen *screen)
       G_CALLBACK (terminal_screen_vte_window_title_changed), screen);
   g_signal_connect (G_OBJECT (screen->terminal), "resize-window",
       G_CALLBACK (terminal_screen_vte_resize_window), screen);
+  g_signal_connect (G_OBJECT (screen->terminal), "bell",
+      G_CALLBACK (terminal_screen_vte_beep), screen);
   g_signal_connect (G_OBJECT (screen->terminal), "draw",
       G_CALLBACK (terminal_screen_draw), screen);
   gtk_box_pack_start (GTK_BOX (screen), screen->terminal, TRUE, TRUE, 0);
@@ -2463,4 +2467,21 @@ terminal_screen_save_contents (TerminalScreen *screen,
   terminal_return_if_fail (TERMINAL_IS_SCREEN (screen));
   vte_terminal_write_contents_sync (VTE_TERMINAL (screen->terminal),
                                     stream, VTE_WRITE_DEFAULT, NULL, &error);
+}
+
+static void
+terminal_screen_vte_beep (VteTerminal    *terminal,
+                          TerminalScreen *screen)
+{
+  GtkWidget *toplevel;
+
+  terminal_return_if_fail (VTE_IS_TERMINAL (terminal));
+  terminal_return_if_fail (TERMINAL_IS_SCREEN (screen));
+
+  /* leave if the window is already active */
+  toplevel = gtk_widget_get_toplevel (GTK_WIDGET (screen));
+  if (gtk_window_is_active ((GtkWindow*)toplevel))
+    return;
+
+  system("notify-send -i utilities-terminal -t 5000 ' '");
 }

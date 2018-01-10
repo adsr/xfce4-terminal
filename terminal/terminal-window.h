@@ -101,6 +101,11 @@ void               terminal_window_rebuild_tabs_menu        (TerminalWindow     
 void               terminal_window_action_show_menubar      (GtkToggleAction    *action,
                                                              TerminalWindow     *window);
 
+void               terminal_window_action_prev_tab          (GtkAction          *action,
+                                                             TerminalWindow     *window);
+void               terminal_window_action_next_tab          (GtkAction          *action,
+                                                             TerminalWindow     *window);
+
 G_END_DECLS
 
 #endif /* !TERMINAL_WINDOW_H */

@@ -206,9 +206,9 @@ static void         terminal_window_action_zoom_out               (GtkAction    
                                                                    TerminalWindow         *window);
 static void         terminal_window_action_zoom_reset             (GtkAction              *action,
                                                                    TerminalWindow         *window);
-static void         terminal_window_action_prev_tab               (GtkAction              *action,
+void                terminal_window_action_prev_tab               (GtkAction              *action,
                                                                    TerminalWindow         *window);
-static void         terminal_window_action_next_tab               (GtkAction              *action,
+void                terminal_window_action_next_tab               (GtkAction              *action,
                                                                    TerminalWindow         *window);
 static void         terminal_window_action_move_tab_left          (GtkAction              *action,
                                                                    TerminalWindow         *window);
@@ -406,7 +406,23 @@ terminal_window_class_init (TerminalWindowClass *klass)
   tabs_menu_action_quark = g_quark_from_static_string ("tabs-menu-item");
 }
 
-
+static gboolean
+on_key_press (GtkWidget *widget, GdkEventKey *event, TerminalWindow *window)
+{
+  if ((event->keyval == GDK_KEY_Tab || event->keyval == GDK_KEY_ISO_Left_Tab) && (event->state & GDK_CONTROL_MASK) != 0)
+    {
+      if (event->keyval == GDK_KEY_ISO_Left_Tab || (event->state & GDK_SHIFT_MASK) != 0)
+        {
+          terminal_window_action_prev_tab(NULL, window);
+        }
+      else
+        {
+          terminal_window_action_next_tab(NULL, window);
+        }
+      return TRUE;
+    }
+  return FALSE;
+}
 
 static void
 terminal_window_init (TerminalWindow *window)
@@ -499,6 +515,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
       G_CALLBACK (terminal_window_notebook_button_release_event), window);
   g_signal_connect (G_OBJECT (window->priv->notebook), "scroll-event",
       G_CALLBACK (terminal_window_notebook_scroll_event), window);
+  g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (on_key_press), window);
 
   gtk_box_pack_start (GTK_BOX (window->priv->vbox), window->priv->notebook, TRUE, TRUE, 0);
   gtk_widget_show_all (window->priv->vbox);
@@ -1809,7 +1826,7 @@ terminal_window_action_zoom_reset (GtkAction      *action,
 
 
 
-static void
+void
 terminal_window_action_prev_tab (GtkAction       *action,
                                  TerminalWindow  *window)
 {
@@ -1818,7 +1835,7 @@ terminal_window_action_prev_tab (GtkAction       *action,
 
 
 
-static void
+void
 terminal_window_action_next_tab (GtkAction       *action,
                                  TerminalWindow  *window)
 {
