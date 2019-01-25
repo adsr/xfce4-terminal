@@ -37,6 +37,7 @@
 #include <terminal/terminal-enum-types.h>
 #include <terminal/terminal-marshal.h>
 #include <terminal/terminal-preferences.h>
+#include <terminal/terminal-window.h>
 #include <terminal/terminal-widget.h>
 #include <terminal/terminal-private.h>
 #include <terminal/terminal-regex.h>
@@ -641,6 +642,18 @@ terminal_widget_key_press_event (GtkWidget    *widget,
         {
           value = MIN (gtk_adjustment_get_value (adjustment) + 1, gtk_adjustment_get_upper (adjustment) - gtk_adjustment_get_page_size (adjustment));
           gtk_adjustment_set_value (adjustment, value);
+          return TRUE;
+        }
+      else if (event->keyval == GDK_KEY_Tab) // && (event->state & GDK_CONTROL_MASK) != 0)
+        {
+          if ((event->state & GDK_SHIFT_MASK) != 0)
+            {
+              terminal_window_action_prev_tab(NULL, GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (widget))));
+            }
+          else
+            {
+              terminal_window_action_next_tab(NULL, GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (widget))));
+            }
           return TRUE;
         }
     }
