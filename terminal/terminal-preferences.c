@@ -88,6 +88,7 @@ enum
   PROP_MISC_ALWAYS_SHOW_TABS,
   PROP_MISC_BELL,
   PROP_MISC_BELL_URGENT,
+  PROP_MISC_TAB_KEY_CYCLE,
   PROP_MISC_BORDERS_DEFAULT,
   PROP_MISC_CURSOR_BLINKS,
   PROP_MISC_CURSOR_SHAPE,
@@ -822,6 +823,16 @@ terminal_preferences_class_init (TerminalPreferencesClass *klass)
       g_param_spec_boolean ("misc-bell-urgent",
                             NULL,
                             "MiscBellUrgent",
+                            FALSE,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  /**
+   * TerminalPreferences:misc-tab-key-cycle:
+   **/
+  preferences_props[PROP_MISC_TAB_KEY_CYCLE] =
+      g_param_spec_boolean ("misc-tab-key-cycle",
+                            NULL,
+                            "MiscTabKeyCycle",
                             FALSE,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 

@@ -217,10 +217,6 @@ static void         terminal_window_action_zoom_out               (GtkAction    
                                                                    TerminalWindow      *window);
 static void         terminal_window_action_zoom_reset             (GtkAction           *action,
                                                                    TerminalWindow      *window);
-static void         terminal_window_action_prev_tab               (GtkAction           *action,
-                                                                   TerminalWindow      *window);
-static void         terminal_window_action_next_tab               (GtkAction           *action,
-                                                                   TerminalWindow      *window);
 static void         terminal_window_action_move_tab_left          (GtkAction           *action,
                                                                    TerminalWindow      *window);
 static void         terminal_window_action_move_tab_right         (GtkAction           *action,
@@ -2047,7 +2043,7 @@ terminal_window_action_zoom_reset (GtkAction      *action,
 
 
 
-static void
+void
 terminal_window_action_prev_tab (GtkAction      *action,
                                  TerminalWindow *window)
 {
@@ -2057,7 +2053,7 @@ terminal_window_action_prev_tab (GtkAction      *action,
 
 
 
-static void
+void
 terminal_window_action_next_tab (GtkAction      *action,
                                  TerminalWindow *window)
 {

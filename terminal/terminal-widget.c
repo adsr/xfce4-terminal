@@ -37,6 +37,7 @@
 #include <terminal/terminal-enum-types.h>
 #include <terminal/terminal-marshal.h>
 #include <terminal/terminal-preferences.h>
+#include <terminal/terminal-window.h>
 #include <terminal/terminal-widget.h>
 #include <terminal/terminal-private.h>
 #include <terminal/terminal-regex.h>
@@ -613,12 +614,14 @@ terminal_widget_key_press_event (GtkWidget    *widget,
   GtkAdjustment *adjustment = gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (widget));
   gboolean       shortcuts_no_menukey;
   gboolean       shift_arrows_scroll;
+  gboolean       tab_key_cycle;
   gdouble        value;
 
   /* determine current settings */
   g_object_get (G_OBJECT (TERMINAL_WIDGET (widget)->preferences),
                 "shortcuts-no-menukey", &shortcuts_no_menukey,
                 "misc-use-shift-arrows-to-scroll", &shift_arrows_scroll,
+                "misc-tab-key-cycle", &tab_key_cycle,
                 NULL);
 
   /* popup context menu if "Menu" or "<Shift>F10" is pressed */
@@ -643,6 +646,15 @@ terminal_widget_key_press_event (GtkWidget    *widget,
           gtk_adjustment_set_value (adjustment, value);
           return TRUE;
         }
+    }
+  else if (G_UNLIKELY ((event->keyval == GDK_KEY_Tab || event->keyval == GDK_KEY_ISO_Left_Tab) && ((event->state & GDK_CONTROL_MASK) != 0) && tab_key_cycle))
+    {
+      /* cycle tabs with "<Primary>Tab" and "<Primary><Shift>Tab" */
+      if ((event->state & GDK_SHIFT_MASK) != 0)
+        terminal_window_action_prev_tab(NULL, TERMINAL_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (widget))));
+      else
+        terminal_window_action_next_tab(NULL, TERMINAL_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (widget))));
+      return TRUE;
     }
 
   return (*GTK_WIDGET_CLASS (terminal_widget_parent_class)->key_press_event) (widget, event);
