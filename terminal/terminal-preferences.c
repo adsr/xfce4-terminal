@@ -124,6 +124,7 @@ enum
   PROP_TITLE_INITIAL,
   PROP_TITLE_MODE,
   PROP_WORD_CHARS,
+  PROP_BELL_CMD,
   PROP_TAB_ACTIVITY_COLOR,
   PROP_TAB_ACTIVITY_TIMEOUT,
   PROP_TEXT_BLINK_MODE,
@@ -1172,6 +1173,16 @@ terminal_preferences_class_init (TerminalPreferencesClass *klass)
                            NULL,
                            "WordChars",
                            "-A-Za-z0-9,./?%&#:_=+@~",
+                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  /**
+   * TerminalPreferences:bell-cmd:
+   **/
+  preferences_props[PROP_BELL_CMD] =
+      g_param_spec_string ("bell-cmd",
+                           NULL,
+                           "BellCmd",
+                           "",
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**

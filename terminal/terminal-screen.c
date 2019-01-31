@@ -132,6 +132,7 @@ static void       terminal_screen_update_scrolling_on_keystroke (TerminalScreen 
 static void       terminal_screen_update_text_blink_mode        (TerminalScreen        *screen);
 static void       terminal_screen_update_title                  (TerminalScreen        *screen);
 static void       terminal_screen_update_word_chars             (TerminalScreen        *screen);
+static void       terminal_screen_update_bell_cmd               (TerminalScreen        *screen);
 static void       terminal_screen_vte_child_exited              (VteTerminal           *terminal,
                                                                  gint                   status,
                                                                  TerminalScreen        *screen);
@@ -185,6 +186,7 @@ struct _TerminalScreen
   gchar               *working_directory;
 
   gchar              **custom_command;
+  gchar               *bell_cmd;
   gchar               *custom_title;
   gchar               *initial_title;
 
@@ -345,6 +347,7 @@ terminal_screen_init (TerminalScreen *screen)
   terminal_screen_update_scrolling_on_keystroke (screen);
   terminal_screen_update_text_blink_mode (screen);
   terminal_screen_update_word_chars (screen);
+  terminal_screen_update_bell_cmd (screen);
   terminal_screen_update_background (screen);
   terminal_screen_update_colors (screen);
 
@@ -380,6 +383,9 @@ terminal_screen_finalize (GObject *object)
   g_free (screen->custom_fg_color);
   g_free (screen->custom_bg_color);
   g_free (screen->custom_title_color);
+
+  if (screen->bell_cmd != NULL)
+    g_free (screen->bell_cmd);
 
   (*G_OBJECT_CLASS (terminal_screen_parent_class)->finalize) (object);
 }
@@ -629,6 +635,8 @@ terminal_screen_preferences_changed (TerminalPreferences *preferences,
     terminal_screen_update_title (screen);
   else if (strcmp ("word-chars", name) == 0)
     terminal_screen_update_word_chars (screen);
+  else if (strcmp ("bell-cmd", name) == 0)
+    terminal_screen_update_bell_cmd (screen);
   else if (strcmp ("misc-tab-position", name) == 0)
     terminal_screen_update_label_orientation (screen);
 }
@@ -1325,6 +1333,34 @@ terminal_screen_update_word_chars (TerminalScreen *screen)
 
 
 static void
+terminal_screen_update_bell_cmd (TerminalScreen *screen)
+{
+  gchar *bell_cmd;
+
+  terminal_return_if_fail (TERMINAL_IS_SCREEN (screen));
+  terminal_return_if_fail (TERMINAL_IS_PREFERENCES (screen->preferences));
+  terminal_return_if_fail (VTE_IS_TERMINAL (screen->terminal));
+
+  /* free existing bell_cmd if it exists */
+  if (G_UNLIKELY (screen->bell_cmd != NULL))
+    {
+      g_free (screen->bell_cmd);
+      screen->bell_cmd = NULL;
+    }
+
+  /* set new bell_cmd */
+  g_object_get (G_OBJECT (screen->preferences), "bell-cmd", &bell_cmd, NULL);
+  if (G_LIKELY (bell_cmd != NULL))
+    {
+      if (strlen (bell_cmd) > 0)
+        screen->bell_cmd = g_strdup (bell_cmd);
+      g_free (bell_cmd);
+    }
+}
+
+
+
+static void
 relaunch_bar_response (GtkInfoBar     *info_bar,
                        gint            response_id,
                        TerminalScreen *screen)
@@ -1688,13 +1724,20 @@ terminal_screen_urgent_bell (TerminalWidget *widget,
                              TerminalScreen *screen)
 {
   gboolean enabled;
+  int rc;
 
   terminal_return_if_fail (TERMINAL_IS_SCREEN (screen));
 
   g_object_get (G_OBJECT (screen->preferences), "misc-bell-urgent", &enabled, NULL);
 
-  if (enabled)
-    gtk_window_set_urgency_hint (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (screen))), TRUE);
+  if (!enabled)
+    return;
+
+  gtk_window_set_urgency_hint (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (screen))), TRUE);
+
+  if (screen->bell_cmd != NULL)
+    rc = system(screen->bell_cmd);
+  (void)rc;
 }
 
 

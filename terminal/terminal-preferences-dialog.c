@@ -277,6 +277,7 @@ error:
   BIND_PROPERTIES ("custom-command", "text");
   BIND_PROPERTIES ("default-working-dir", "text");
   BIND_PROPERTIES ("word-chars", "text");
+  BIND_PROPERTIES ("bell-cmd", "text");
   BIND_PROPERTIES ("scrolling-lines", "value");
   BIND_PROPERTIES ("tab-activity-timeout", "value");
   BIND_PROPERTIES ("background-darkness", "value");
